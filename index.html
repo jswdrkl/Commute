@@ -345,24 +345,38 @@
 
     /* Bottom Share Action Container */
     .bottom-share-wrap {
-      margin-top: 1.75rem;
+      width: 100%;
+      margin-top: 1.85rem;
+      padding: 0.25rem 0 calc(1.5rem + env(safe-area-inset-bottom, 0px));
       display: flex;
       justify-content: center;
       align-items: center;
+      position: relative;
+      z-index: 20;
+      flex-shrink: 0;
     }
 
     .share-btn {
       width: 48px;
       height: 48px;
+      min-width: 48px;
+      min-height: 48px;
+      padding: 0;
       border-radius: 9999px;
       background-color: var(--btn-bg);
       color: var(--text-primary);
       border: 1px solid var(--btn-border);
-      box-shadow: 0 6px 18px rgba(0, 0, 0, 0.07);
+      box-shadow: 0 6px 18px rgba(0, 0, 0, 0.08);
       cursor: pointer;
-      display: flex;
+      display: inline-flex;
       align-items: center;
       justify-content: center;
+      position: relative;
+      z-index: 21;
+      opacity: 1;
+      visibility: visible;
+      -webkit-appearance: none;
+      appearance: none;
       transition: transform 0.2s ease, background-color 0.3s ease, border-color 0.3s ease;
       -webkit-tap-highlight-color: transparent;
     }
@@ -377,18 +391,27 @@
     }
 
     .share-btn svg {
-      width: 21px;
-      height: 21px;
+      width: 22px;
+      height: 22px;
+      min-width: 22px;
+      min-height: 22px;
+      flex-shrink: 0;
       stroke: currentColor;
       fill: none;
       stroke-width: 1.8;
       stroke-linecap: round;
       stroke-linejoin: round;
+      pointer-events: none;
+    }
+
+    .share-btn .icon-share {
+      display: block;
     }
 
     .share-btn .icon-check {
       display: none;
       color: #2B9348;
+      stroke: #2B9348;
     }
 
     .share-btn.copied .icon-share {
@@ -403,7 +426,7 @@
     @media (max-width: 768px) {
       body {
         font-size: 1.175rem;
-        padding: 1rem 0.75rem 3rem;
+        padding: 1rem 0.75rem calc(3.5rem + env(safe-area-inset-bottom, 0px));
       }
 
       .theme-toggle {
@@ -642,7 +665,7 @@
   <div class="bottom-share-wrap">
     <button type="button" class="share-btn" id="shareBtn" aria-label="Share">
       <!-- Share Icon -->
-      <svg class="icon-share" viewBox="0 0 24 24">
+      <svg class="icon-share" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
         <circle cx="18" cy="5" r="3"></circle>
         <circle cx="6" cy="12" r="3"></circle>
         <circle cx="18" cy="19" r="3"></circle>
@@ -650,7 +673,7 @@
         <line x1="15.41" y1="6.51" x2="8.59" y2="10.49"></line>
       </svg>
       <!-- Checkmark Feedback Icon -->
-      <svg class="icon-check" viewBox="0 0 24 24">
+      <svg class="icon-check" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#2B9348" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
         <polyline points="20 6 9 17 4 12"></polyline>
       </svg>
     </button>
@@ -688,7 +711,7 @@
 
       // Fallback Clipboard Copy Helper
       function copyTextToClipboard(text) {
-        if (navigator.clipboard && window.isSecureContext) {
+        if (navigator.clipboard && typeof navigator.clipboard.writeText === 'function' && window.isSecureContext) {
           return navigator.clipboard.writeText(text).catch(function () {
             fallbackExecCommandCopy(text);
           });
@@ -701,12 +724,15 @@
       function fallbackExecCommandCopy(text) {
         const textArea = document.createElement('textarea');
         textArea.value = text;
+        textArea.setAttribute('readonly', '');
         textArea.style.position = 'fixed';
-        textArea.style.top = '-9999px';
+        textArea.style.top = '0';
         textArea.style.left = '-9999px';
+        textArea.style.opacity = '0';
         document.body.appendChild(textArea);
         textArea.focus();
         textArea.select();
+        textArea.setSelectionRange(0, textArea.value.length);
         try {
           document.execCommand('copy');
         } catch (err) {
@@ -727,19 +753,19 @@
         }, 2200);
       }
 
-      // Share Button Handler (Web Share API with Clipboard Fallback)
-      shareBtn.addEventListener('click', async function () {
+      // Share Button Handler (Web Share API with Clipboard & Legacy Fallback)
+      shareBtn.addEventListener('click', async function (event) {
+        event.preventDefault();
         const shareTitle = 'कम्यूट';
-        const shareText = 'कम्यूट - Commute';
+        const shareText = 'कम्यूट';
         const shareUrl = window.location.href;
 
-        if (navigator.share) {
+        if (typeof navigator.share === 'function') {
           try {
-            await navigator.share({
-              title: shareTitle,
-              text: shareText,
-              url: shareUrl
-            });
+            const sharePayload = shareUrl && shareUrl.startsWith('http')
+              ? { title: shareTitle, text: shareText, url: shareUrl }
+              : { title: shareTitle, text: document.querySelector('.essay-content').innerText };
+            await navigator.share(sharePayload);
             showCopiedFeedback();
             return;
           } catch (err) {
