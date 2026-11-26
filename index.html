@@ -83,31 +83,18 @@
 
     html {
       scroll-behavior: smooth;
-      -webkit-text-size-adjust: 100%;
-    }
-
-    body {
-      background-color: var(--bg-page);
-      color: var(--text-primary);
-      font-family: 'IBM Plex Sans Devanagari', 'Ubuntu', sans-serif;
-      font-size: 1.25rem;
-      line-height: 1.9;
-      font-weight: 400;
-      transition: background-color 0.35s ease, color 0.35s ease;
-      min-height: 100vh;
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      padding: 1.5rem 1rem 3.5rem;
-      overflow-x: hidden;
-    }
-
-    /* Floating Minimal Theme Toggle Button */
-    .theme-toggle {
+    /* Floating Minimal Top-Right Control Cluster (Share + Theme Toggle) */
+    .top-controls {
       position: fixed;
       top: 1.1rem;
       right: 1.1rem;
       z-index: 50;
+      display: flex;
+      align-items: center;
+      gap: 0.6rem;
+    }
+
+    .control-btn {
       width: 44px;
       height: 44px;
       border-radius: 9999px;
@@ -123,16 +110,16 @@
       -webkit-tap-highlight-color: transparent;
     }
 
-    .theme-toggle:hover {
+    .control-btn:hover {
       background-color: var(--btn-hover);
       transform: scale(1.06);
     }
 
-    .theme-toggle:active {
+    .control-btn:active {
       transform: scale(0.96);
     }
 
-    .theme-toggle svg {
+    .control-btn svg {
       width: 20px;
       height: 20px;
       stroke: currentColor;
@@ -140,6 +127,19 @@
       stroke-width: 1.8;
       stroke-linecap: round;
       stroke-linejoin: round;
+    }
+
+    .control-btn .icon-check {
+      display: none;
+      color: #2B9348;
+    }
+
+    .control-btn.copied .icon-share {
+      display: none;
+    }
+
+    .control-btn.copied .icon-check {
+      display: block;
     }
 
     [data-theme="light"] .icon-sun {
@@ -329,64 +329,6 @@
       user-select: none;
     }
 
-    /* Bottom Share Button Area */
-    .share-section {
-      margin-top: 2rem;
-      display: flex;
-      justify-content: center;
-      align-items: center;
-    }
-
-    .share-btn {
-      width: 54px;
-      height: 54px;
-      border-radius: 9999px;
-      background-color: var(--btn-bg);
-      color: var(--text-primary);
-      border: 1px solid var(--btn-border);
-      box-shadow: 0 8px 24px rgba(0, 0, 0, 0.08);
-      cursor: pointer;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      transition: transform 0.22s ease, background-color 0.3s ease, border-color 0.3s ease, box-shadow 0.3s ease;
-      -webkit-tap-highlight-color: transparent;
-    }
-
-    .share-btn:hover {
-      background-color: var(--btn-hover);
-      transform: translateY(-2px) scale(1.05);
-      box-shadow: 0 12px 28px rgba(0, 0, 0, 0.12);
-    }
-
-    .share-btn:active {
-      transform: scale(0.95);
-    }
-
-    .share-btn svg {
-      width: 22px;
-      height: 22px;
-      stroke: currentColor;
-      fill: none;
-      stroke-width: 1.8;
-      stroke-linecap: round;
-      stroke-linejoin: round;
-      transition: opacity 0.2s ease, transform 0.2s ease;
-    }
-
-    .share-btn .icon-check {
-      display: none;
-      color: #2B9348;
-    }
-
-    .share-btn.copied .icon-share {
-      display: none;
-    }
-
-    .share-btn.copied .icon-check {
-      display: block;
-    }
-
     /* Mobile & Smaller Screens Typography & Spacing */
     @media (max-width: 768px) {
       body {
@@ -394,9 +336,13 @@
         padding: 1rem 0.75rem 3rem;
       }
 
-      .theme-toggle {
+      .top-controls {
         top: 0.75rem;
         right: 0.75rem;
+        gap: 0.5rem;
+      }
+
+      .control-btn {
         width: 40px;
         height: 40px;
       }
@@ -439,25 +385,42 @@
 </head>
 <body>
 
-  <!-- Minimal Icon-Only Light/Dark Theme Toggle -->
-  <button type="button" class="theme-toggle" id="themeToggle" aria-label="Toggle theme">
-    <!-- Moon Icon (shown in light mode) -->
-    <svg class="icon-moon" viewBox="0 0 24 24">
-      <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"></path>
-    </svg>
-    <!-- Sun Icon (shown in dark mode) -->
-    <svg class="icon-sun" viewBox="0 0 24 24">
-      <circle cx="12" cy="12" r="5"></circle>
-      <line x1="12" y1="1" x2="12" y2="3"></line>
-      <line x1="12" y1="21" x2="12" y2="23"></line>
-      <line x1="4.22" y1="4.22" x2="5.64" y2="5.64"></line>
-      <line x1="18.36" y1="18.36" x2="19.78" y2="19.78"></line>
-      <line x1="1" y1="12" x2="3" y2="12"></line>
-      <line x1="21" y1="12" x2="23" y2="12"></line>
-      <line x1="4.22" y1="19.78" x2="5.64" y2="18.36"></line>
-      <line x1="18.36" y1="5.64" x2="19.78" y2="4.22"></line>
-    </svg>
-  </button>
+  <!-- Minimal Icon-Only Floating Control Bar (Share + Theme Toggle) -->
+  <div class="top-controls">
+    <button type="button" class="control-btn" id="shareBtn" aria-label="Share">
+      <!-- Share Icon -->
+      <svg class="icon-share" viewBox="0 0 24 24">
+        <circle cx="18" cy="5" r="3"></circle>
+        <circle cx="6" cy="12" r="3"></circle>
+        <circle cx="18" cy="19" r="3"></circle>
+        <line x1="8.59" y1="13.51" x2="15.42" y2="17.49"></line>
+        <line x1="15.41" y1="6.51" x2="8.59" y2="10.49"></line>
+      </svg>
+      <!-- Checkmark Feedback Icon -->
+      <svg class="icon-check" viewBox="0 0 24 24">
+        <polyline points="20 6 9 17 4 12"></polyline>
+      </svg>
+    </button>
+
+    <button type="button" class="control-btn" id="themeToggle" aria-label="Toggle theme">
+      <!-- Moon Icon (shown in light mode) -->
+      <svg class="icon-moon" viewBox="0 0 24 24">
+        <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"></path>
+      </svg>
+      <!-- Sun Icon (shown in dark mode) -->
+      <svg class="icon-sun" viewBox="0 0 24 24">
+        <circle cx="12" cy="12" r="5"></circle>
+        <line x1="12" y1="1" x2="12" y2="3"></line>
+        <line x1="12" y1="21" x2="12" y2="23"></line>
+        <line x1="4.22" y1="4.22" x2="5.64" y2="5.64"></line>
+        <line x1="18.36" y1="18.36" x2="19.78" y2="19.78"></line>
+        <line x1="1" y1="12" x2="3" y2="12"></line>
+        <line x1="21" y1="12" x2="23" y2="12"></line>
+        <line x1="4.22" y1="19.78" x2="5.64" y2="18.36"></line>
+        <line x1="18.36" y1="5.64" x2="19.78" y2="4.22"></line>
+      </svg>
+    </button>
+  </div>
 
   <!-- Main Essay Card -->
   <main class="essay-wrapper">
@@ -608,24 +571,6 @@
       <div class="essay-closing-emoji" aria-hidden="true">🚦</div>
     </article>
   </main>
-
-  <!-- Share Button at the Bottom (Icon-only) -->
-  <div class="share-section">
-    <button type="button" class="share-btn" id="shareBtn" aria-label="Share">
-      <!-- Share Icon -->
-      <svg class="icon-share" viewBox="0 0 24 24">
-        <circle cx="18" cy="5" r="3"></circle>
-        <circle cx="6" cy="12" r="3"></circle>
-        <circle cx="18" cy="19" r="3"></circle>
-        <line x1="8.59" y1="13.51" x2="15.42" y2="17.49"></line>
-        <line x1="15.41" y1="6.51" x2="8.59" y2="10.49"></line>
-      </svg>
-      <!-- Checkmark Feedback Icon -->
-      <svg class="icon-check" viewBox="0 0 24 24">
-        <polyline points="20 6 9 17 4 12"></polyline>
-      </svg>
-    </button>
-  </div>
 
   <script>
     (function () {
